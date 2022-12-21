@@ -7,8 +7,8 @@ const multer = require("multer");
 
 const con = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "Welcome@123456",
+  user: "",
+  password: "",
   database: "simpleangular",
 });
 /* GET users listing. */
