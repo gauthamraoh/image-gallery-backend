@@ -6,10 +6,10 @@ const mysql = require("mysql");
 const multer = require("multer");
 
 const con = mysql.createConnection({
-  host: "imageupload.database.windows.net",
-  user: "user",
+  host: "localhost",
+  user: "root",
   password: "Welcome@123456",
-  database: "simpleangular"
+  database: "simpleangular",
 });
 /* GET users listing. */
 router.post("/register", async function (req, res, next) {
