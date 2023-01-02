@@ -96,11 +96,88 @@ router.post("/multifiles/:userid", upload.array("files"), (req, res) => {
   }
 });
 
+router.post("/profileimage/:userid", upload.array("files"), (req, res) => {
+  try {
+    const files = req.files;
+    if (Array.isArray(files) && files.length > 0) {
+      files.forEach((ele) => {
+        const sql = `UPDATE users SET avatar = ? WHERE id = ?`;
+        let fileName = ele.filename;
+        con.query(
+          sql,
+          [fileName, req.params.userid],
+          (err, result, fields) => {
+          }
+        );
+      });
+      res.json(files);
+    } else {
+      throw new Error("File upload unsuccessful");
+    }
+  } catch (error) {
+    res.send({ status: 0, error: error });
+  }
+});
+
 router.post("/images/:userid", (req, res) => {
   try {
     const sql = `SELECT * FROM users_file WHERE user_id = ?`;
     con.query(sql, [req.params.userid], function (err, result, fields) {
       res.send({ data: result });
+    });
+  } catch (error) {
+    res.send({ status: 0, error: error });
+  }
+});
+
+router.post("/image/:userid", (req, res) => {
+  try {
+    const sql = `SELECT avatar FROM users WHERE id = ?`;
+    con.query(sql, [req.params.userid], function (err, result, fields) {
+      res.send({ data: result });
+    });
+  } catch (error) {
+    res.send({ status: 0, error: error });
+  }
+});
+
+router.delete("/deletemedia/:id/:userid", (req, res) => {
+  try {
+    const sql = `DELETE FROM users_file WHERE id = ? && user_id = ?`;
+    con.query(sql, [req.params.id, req.params.userid], function (err, result, fields) {
+      res.send({ data: result });
+    });
+  } catch (error) {
+    res.send({ status: 0, error: error });
+  }
+});
+
+// reset password
+router.post("/resetpassword", async function (req, res, next) {
+  try {
+    let { id, oldpassword, newpassword } = req.body;
+    const hashed_oldpassword = md5(oldpassword.toString());
+    const hashed_newpassword = md5(newpassword.toString());
+    const checkUsername = `Select password FROM users WHERE id = ?`;
+    con.query(checkUsername, [id], (err, result, fields) => {
+      if (err) {
+        res.send({ status: 4, data: "Server Error" });
+      } else if(JSON.parse(JSON.stringify(result))[0].password === hashed_oldpassword){
+        const sql = `UPDATE users SET password = ? WHERE id = ?`;
+        con.query(
+          sql,
+          [hashed_newpassword, id],
+          (err, result, fields) => {
+            if (err) {
+              res.send({ status: 0, data: err });
+            } else {
+              res.send({ status: 9, data: result});
+            }
+          }
+        );
+      } else {
+        res.send({status: 8, data: 'Incorrect old password'})
+      }
     });
   } catch (error) {
     res.send({ status: 0, error: error });
